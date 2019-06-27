@@ -3,7 +3,6 @@
 #include <iostream>
 #include <string>
 
-// #include <debug/formatter.h>
 int main()
 {
     // This creates two matrices with default values
@@ -37,6 +36,7 @@ int main()
     Matrix<double> t = m1.transpose();
     t.print();
 
+    // Creating a char matrix
     std::cout << "Creating character matrices" << '\n';
     Matrix<char> charMatrix(3, 3, 'a');
     charMatrix.print();
@@ -44,8 +44,31 @@ int main()
     Matrix<char> anotherCharMatrix(3, 2, 'b');
     anotherCharMatrix.print();
 
+    // Checking multiplication of 2 char matrices
     std::cout << "Multiplication of character matrices" << '\n';
-    charMatrix *= anotherCharMatrix;
+    try
+    {
+        auto r = charMatrix * anotherCharMatrix;
+    }
+    catch (const matrix_error &e)
+    {
+        std::cerr << "[ERROR] " << e.what() << '\n';
+    }
+
+    // Creating boolean matrix
+    Matrix<bool> boolM1(2, 2, false);
+    Matrix<bool> boolM2(2, 2, true);
+    std::cout << "Multiplication of boolean matrix" << '\n';
+
+    // Checking multiplication of 2 boolean matrices
+    try
+    {
+        boolM1 *= boolM2;
+    }
+    catch (const matrix_error &e)
+    {
+        std::cerr << "[ERROR] " << e.what() << '\n';
+    }
 
     return 0;
 }

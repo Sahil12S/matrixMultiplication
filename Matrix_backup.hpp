@@ -1,7 +1,6 @@
 // Matrix imlementation C++
-//
+
 // Author: Sahil Sharma
-//
 
 #ifndef MATRIX_H
 #define MATRIX_H
@@ -11,17 +10,14 @@
 #include <exception>
 #include <assert.h>
 
-class matrix_error : public std::exception
+class matrix_error : public std::logic_error
 {
-private:
-    std::string err;
-
 public:
-    matrix_error(const std::string &what_arg) : err(what_arg) {}
-    virtual const char *what() const throw()
-    {
-        return err.c_str();
-    }
+    matrix_error() noexcept;
+    matrix_error(const matrix_error &) noexcept;
+    matrix_error &operator=(const matrix_error &) noexcept;
+    virtual ~matrix_error();
+    virtual const char *what() const noexcept;
 };
 
 template <class T>
@@ -38,7 +34,14 @@ private:
     // Used to store all the values of matrix
     std::vector<std::vector<T>> m_Matrix;
 
+    std::string err_msg;
+
 public:
+    // Constructor
+    Matrix()
+    {
+    }
+
     /**
      *  @brief  Constructor that creates empty matrix of size __numRows * __numCols
      *  @param __numRows  Number of rows in matrix
@@ -123,7 +126,7 @@ public:
      *  Overloaded assignment operator for assigning one matrix to other.
      *  On performing the operation, current matrix will become same as __otherMatrix.
      */
-    virtual Matrix operator=(const Matrix &__otherMatrix)
+    Matrix operator=(const Matrix &__otherMatrix)
     {
         if (&__otherMatrix == this)
         {
@@ -148,37 +151,41 @@ public:
      *  @brief  Multiply 2 matrices and return the result
      *  @param __otherMatrix  Second (right) matrix for multiplication
      *  @return  Returns result on multiplication of two matrices
-     *  @throw  matrix_error when multiplication is performed on char, string or boolean matrices
-     *          and when matrices are not of MxN and NxP sizes
      * 
      *  Overloaded multiplication operator for multiplication of two matrices.
-     *  Matrices are first checked if operation can be performed on data_type
-     *  and matrix sizes are checked for valid multiplication operation.
      *  On multiplying both matrices it returns the result.
      */
-    virtual Matrix operator*(const Matrix &__otherMatrix)
+    Matrix operator*(const Matrix &__otherMatrix)
     {
+        // static_assert(!std::is_same<T, char>::value, "Matrix multiplication can't be performed on char");
+        // static_assert(!std::is_same<T, std::string>::value, "Matrix multiplication can't be performed on char");
+        // assert((!std::is_same<T, char>::value, "Matrix multiplication can't be performed on char"));
+        // assert((!std::is_same<T, std::string>::value, "Matrix multiplication can't be performed on string matrix"));
+
         if (std::is_same<T, char>::value)
         {
-            throw matrix_error("Matrix multiplication can't be performed on char matrix");
+            throw std::logic_error("Matrix multiplication can't be performed on char matrix");
         }
         if (std::is_same<T, std::string>::value)
         {
-            throw matrix_error("Matrix multiplication can't be performed on string matrix");
+            throw std::logic_error("Matrix multiplication can't be performed on string matrix");
         }
         if (std::is_same<T, bool>::value)
         {
-            throw matrix_error("Matrix multiplication can't be performed on boolean matrix");
+            throw std::logic_error("Matrix multiplication can't be performed on boolean matrix");
         }
 
         Matrix res(m_NumRows, __otherMatrix.getColumnSize(), static_cast<T>(0));
 
+        // try
+        // {
         if (m_NumCols != __otherMatrix.getRowSize())
         {
-            std::string err_msg = "Allowed matrices of size: MxN & NxP. Here: " + std::to_string(m_NumRows) + "x" + std::to_string(m_NumCols) + " & " + std::to_string(__otherMatrix.getRowSize()) + "x" + std::to_string(__otherMatrix.getColumnSize());
+            err_msg = "Allowed matrices of size: MxN & NxP. Here: " + std::to_string(m_NumRows) + "x" + std::to_string(m_NumCols) + " & " + std::to_string(__otherMatrix.getRowSize()) + "x" + std::to_string(__otherMatrix.getColumnSize());
             throw std::out_of_range(err_msg);
         }
 
+        // Now loop through
         for (unsigned i = 0; i < m_NumRows; i++)
         {
             for (unsigned k = 0; k < __otherMatrix.getColumnSize(); k++)
@@ -198,40 +205,41 @@ public:
      *  @brief  Multiplies 2 matrices and store answer in original one
      *  @param __otherMatrix  Second (right) matrix for multiplication
      *  @return  Returns original matrix after storing multiplication result in it
-     *  @throw  matrix_error when multiplication is performed on char, string or boolean matrices
-     *          and when matrices are not of MxN and NxP sizes
      * 
      *  Overloaded assignment multiplication operator for multiplication of two matrices
      *  that store result back in original (first) matrix and returns it as the result.
-     *  Matrices are first checked if operation can be performed on data_type
-     *  and matrix sizes are checked for valid multiplication operation.
-     *  This operation changes the original matrix that is on the left side of operator with
+     *  This changes the original matrix that is on left side of operator with
      *  the result of multiplication.
      */
-    virtual Matrix operator*=(const Matrix &__otherMatrix)
+    Matrix operator*=(const Matrix &__otherMatrix)
     {
+        // static_assert(!std::is_same<T, char>::value, "Matrix multiplication can't be performed on char");
+        // static_assert(!std::is_same<T, std::string>::value, "Matrix multiplication can't be performed on char");
+        // assert((!std::is_same<T, char>::value, "Matrix multiplication can't be performed on char"));
+        // assert((!std::is_same<T, std::string>::value, "Matrix multiplication can't be performed on string matrix"));
         if (std::is_same<T, char>::value)
         {
-            throw matrix_error("Matrix multiplication can't be performed on char matrix");
+            throw std::logic_error("Matrix multiplication can't be performed on char matrix");
         }
         if (std::is_same<T, std::string>::value)
         {
-            throw matrix_error("Matrix multiplication can't be performed on string matrix");
+            throw std::logic_error("Matrix multiplication can't be performed on string matrix");
         }
         if (std::is_same<T, bool>::value)
         {
-            throw matrix_error("Matrix multiplication can't be performed on boolean matrix");
+            throw std::logic_error("Matrix multiplication can't be performed on boolean matrix");
         }
 
-        std::vector<std::vector<T>> temp(
-            m_NumRows,
-            std::vector<T>(__otherMatrix.getColumnSize(),
-                           static_cast<T>(0)));
+        std::vector<std::vector<T>>
+            temp(
+                m_NumRows,
+                std::vector<T>(__otherMatrix.getColumnSize(),
+                               static_cast<T>(0)));
 
         if (m_NumCols != __otherMatrix.getRowSize())
         {
-            std::string err_msg = "Allowed matrices of size: MxN & NxP. Here: " + std::to_string(m_NumRows) + "x" + std::to_string(m_NumCols) + " & " + std::to_string(__otherMatrix.getRowSize()) + "x" + std::to_string(__otherMatrix.getColumnSize());
-            throw matrix_error(err_msg);
+            err_msg = "Allowed matrices of size: MxN & NxP. Here: " + std::to_string(m_NumRows) + "x" + std::to_string(m_NumCols) + " & " + std::to_string(__otherMatrix.getRowSize()) + "x" + std::to_string(__otherMatrix.getColumnSize());
+            throw std::out_of_range(err_msg);
         }
 
         for (unsigned i = 0; i < m_NumRows; i++)
@@ -331,7 +339,7 @@ public:
     {
         if (__row >= m_NumRows || __col >= m_NumCols)
         {
-            std::string err_msg = "Matrix of size: " + std::to_string(m_NumRows) + "x" + std::to_string(m_NumCols) + ". Queried row & col index " + std::to_string(__row) + "," + std::to_string(__col);
+            err_msg = "Matrix of size: " + std::to_string(m_NumRows) + "x" + std::to_string(m_NumCols) + ". Queried row & col index " + std::to_string(__row) + "," + std::to_string(__col);
             throw std::out_of_range(err_msg);
         }
         m_Matrix[__row][__col] = __val;
