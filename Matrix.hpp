@@ -1,6 +1,6 @@
 // Matrix imlementation C++
-//
-//
+
+// Author: Sahil Sharma
 
 #ifndef MATRIX_H
 #define MATRIX_H
@@ -10,19 +10,14 @@
 #include <exception>
 #include <assert.h>
 
-class MatrixException
+class matrix_error : public std::logic_error
 {
-private:
-    const std::string errMessage;
-    // const char *errMessage;
-
 public:
-    MatrixException(const char *msg) : errMessage(msg) {}
-    ~MatrixException() {}
-    virtual const char *what() const throw()
-    {
-        return errMessage.c_str();
-    }
+    matrix_error() noexcept;
+    matrix_error(const matrix_error &) noexcept;
+    matrix_error &operator=(const matrix_error &) noexcept;
+    virtual ~matrix_error();
+    virtual const char *what() const noexcept;
 };
 
 template <class T>
@@ -87,28 +82,14 @@ public:
             return;
         }
         m_Matrix.resize(m_NumRows, std::vector<T>(m_NumCols));
-        // try
-        // {
+
         for (unsigned i = 0; i < m_NumRows; i++)
         {
-            // if (__otherMatrix[i].size() != m_NumCols)
-            // {
-            //     // std::string msg
-            //     // throw std::out_of_range("All row sizes should be same");
-            //     // throw MatrixException("Not a proper matrix. All columns should be of equal size.");
-            // }
             for (unsigned j = 0; j < m_NumCols; j++)
             {
                 m_Matrix[i][j] = __otherMatrix[i][j];
             }
         }
-        // }
-        // catch (std::exception &e)
-        // catch (const MatrixException &m)
-        // catch (const std::out_of_range &e)
-        // {
-        //     std::cout << "[ERROR] " << e.what() << '\n';
-        // }
     }
 
     /**
@@ -145,7 +126,7 @@ public:
      *  Overloaded assignment operator for assigning one matrix to other.
      *  On performing the operation, current matrix will become same as __otherMatrix.
      */
-    virtual Matrix operator=(const Matrix &__otherMatrix)
+    Matrix operator=(const Matrix &__otherMatrix)
     {
         if (&__otherMatrix == this)
         {
@@ -174,10 +155,21 @@ public:
      *  Overloaded multiplication operator for multiplication of two matrices.
      *  On multiplying both matrices it returns the result.
      */
-    virtual Matrix operator*(const Matrix &__otherMatrix)
+    Matrix operator*(const Matrix &__otherMatrix)
     {
-        static_assert(!std::is_same<T, char>::value, "Matrix multiplication can't be performed on char");
-        static_assert(!std::is_same<T, std::string>::value, "Matrix multiplication can't be performed on char");
+        // static_assert(!std::is_same<T, char>::value, "Matrix multiplication can't be performed on char");
+        // static_assert(!std::is_same<T, std::string>::value, "Matrix multiplication can't be performed on char");
+        // assert((!std::is_same<T, char>::value, "Matrix multiplication can't be performed on char"));
+        // assert((!std::is_same<T, std::string>::value, "Matrix multiplication can't be performed on string matrix"));
+
+        if (std::is_same<T, char>::value)
+        {
+            throw std::logic_error("Matrix multiplication can't be performed on char matrix");
+        }
+        if (std::is_same<T, std::string>::value)
+        {
+            throw std::logic_error("Matrix multiplication can't be performed on string matrix");
+        }
 
         Matrix res(m_NumRows, __otherMatrix.getColumnSize(), static_cast<T>(0));
 
@@ -186,15 +178,8 @@ public:
         if (m_NumCols != __otherMatrix.getRowSize())
         {
             err_msg = "Allowed matrices of size: MxN & NxP. Here: " + std::to_string(m_NumRows) + "x" + std::to_string(m_NumCols) + " & " + std::to_string(__otherMatrix.getRowSize()) + "x" + std::to_string(__otherMatrix.getColumnSize());
-            // throw MatrixException("Mutliplication not possible. Check dimensions of matrix.");
-            // throw std::out_of_range("Matrix column row doesn't match");
             throw std::out_of_range(err_msg);
         }
-
-        // if (std::is_same<T, char>::value || std::is_same<T, std::string>::value)
-        // {
-        //     throw MatrixException("String or char matrix can't be multiplied");
-        // }
 
         // Now loop through
         for (unsigned i = 0; i < m_NumRows; i++)
@@ -208,11 +193,6 @@ public:
                 }
             }
         }
-        // }
-        // catch (const MatrixException &m)
-        // {
-        //     std::cout << "[ERROR] " << m.what() << '\n';
-        // }
 
         return res;
     }
@@ -227,31 +207,32 @@ public:
      *  This changes the original matrix that is on left side of operator with
      *  the result of multiplication.
      */
-    virtual Matrix
-    operator*=(const Matrix &__otherMatrix)
+    Matrix operator*=(const Matrix &__otherMatrix)
     {
-        static_assert(!std::is_same<T, char>::value, "Matrix multiplication can't be performed on char");
-        static_assert(!std::is_same<T, std::string>::value, "Matrix multiplication can't be performed on char");
+        // static_assert(!std::is_same<T, char>::value, "Matrix multiplication can't be performed on char");
+        // static_assert(!std::is_same<T, std::string>::value, "Matrix multiplication can't be performed on char");
+        // assert((!std::is_same<T, char>::value, "Matrix multiplication can't be performed on char"));
+        // assert((!std::is_same<T, std::string>::value, "Matrix multiplication can't be performed on string matrix"));
+        if (std::is_same<T, char>::value)
+        {
+            throw std::logic_error("Matrix multiplication can't be performed on char matrix");
+        }
+        if (std::is_same<T, std::string>::value)
+        {
+            throw std::logic_error("Matrix multiplication can't be performed on string matrix");
+        }
 
-        std::vector<std::vector<T>> temp(
-            m_NumRows,
-            std::vector<T>(__otherMatrix.getColumnSize(),
-                           static_cast<T>(0)));
+        std::vector<std::vector<T>>
+            temp(
+                m_NumRows,
+                std::vector<T>(__otherMatrix.getColumnSize(),
+                               static_cast<T>(0)));
 
-        // try
-        // {
         if (m_NumCols != __otherMatrix.getRowSize())
         {
             err_msg = "Allowed matrices of size: MxN & NxP. Here: " + std::to_string(m_NumRows) + "x" + std::to_string(m_NumCols) + " & " + std::to_string(__otherMatrix.getRowSize()) + "x" + std::to_string(__otherMatrix.getColumnSize());
-            // throw MatrixException("Mutliplication not possible. Check dimensions of matrix.");
-            // throw std::out_of_range("Matrix column row doesn't match");
             throw std::out_of_range(err_msg);
         }
-
-        // if (std::is_same<T, std::string>::value || std::is_same<T, char>::value)
-        // {
-        //     throw "String or char matrix can't be multiplied";
-        // }
 
         // Now loop through
         for (unsigned i = 0; i < m_NumRows; i++)
@@ -265,11 +246,6 @@ public:
                 }
             }
         }
-        // }
-        // catch (const MatrixException &m)
-        // {
-        //     std::cout << "[ERROR] " << m.what() << '\n';
-        // }
 
         m_Matrix = temp;
         m_NumCols = __otherMatrix.getColumnSize();
@@ -284,7 +260,7 @@ public:
      *  This function returns transpose of current matrix.
      *  Transpose of matrix is obtained after swapping rows and columns of matrix
      */
-    virtual Matrix transpose()
+    Matrix transpose()
     {
         Matrix res(m_NumCols, m_NumRows, static_cast<T>(0));
         for (unsigned i = 0; i < m_NumRows; i++)
@@ -303,7 +279,7 @@ public:
      * 
      *  This function returns the row size of the matrix
      */
-    virtual unsigned getRowSize() const
+    unsigned getRowSize() const
     {
         return m_NumRows;
     }
@@ -314,7 +290,7 @@ public:
      * 
      *  This function returns the column size of the matrix
      */
-    virtual unsigned getColumnSize() const
+    unsigned getColumnSize() const
     {
         return m_NumCols;
     }
@@ -330,20 +306,14 @@ public:
      *  This function takes row and columns position in matrix
      *  and returns value present at that position in matrix
      */
-    virtual T getVal(unsigned __row, unsigned __col) const
+    T getVal(unsigned __row, unsigned __col) const
     {
-        // try
-        // {
         if (__row >= m_NumRows || __col >= m_NumCols)
         {
             std::string err = "Matrix of size: " + std::to_string(m_NumRows) + "x" + std::to_string(m_NumCols) + ". Queried row & col index " + std::to_string(__row) + "," + std::to_string(__col);
             throw std::out_of_range(err);
         }
-        // }
-        // catch (const MatrixException &m)
-        // {
-        //     std::cout << "[ERROR] " << m.what() << '\n';
-        // }
+
         return m_Matrix[__row][__col];
     }
 
@@ -352,30 +322,24 @@ public:
      *  @param __row  Row position where value is to be updated
      *  @param __col  Column position where value is to be updated
      *  @param __val  New value for the given position
+     *  @throw  std::out_of_range  If __row >= m_NumRows or __col >= m_NumCols
+     *      or __row < 0 or __col < 0
      *  
      *  This function takes row and columns positions int the matrix
      *  and new value with which existing value is to be replaced.
      */
-    virtual void update(unsigned __row, unsigned __col, T __val)
+    void update(unsigned __row, unsigned __col, T __val)
     {
-        // try
-        // {
         if (__row >= m_NumRows || __col >= m_NumCols)
         {
-            // throw MatrixException("Index out of range.");
             err_msg = "Matrix of size: " + std::to_string(m_NumRows) + "x" + std::to_string(m_NumCols) + ". Queried row & col index " + std::to_string(__row) + "," + std::to_string(__col);
             throw std::out_of_range(err_msg);
         }
         m_Matrix[__row][__col] = __val;
-        // }
-        // catch (const MatrixException &m)
-        // {
-        //     std::cout << "[ERROR] " << m.what() << '\n';
-        // }
     }
 
     // Prints the matrix
-    virtual void print() const
+    void print() const
     {
         for (unsigned i = 0; i < m_NumRows; i++)
         {
