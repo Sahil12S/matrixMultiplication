@@ -10,4 +10,4 @@ main.o: main.cpp Matrix.hpp
 		$(CC) $(VERSION) $(CFLAGS) -c main.cpp
 
 clean: 
-	-rm *.o
+	-rm *.o matrix

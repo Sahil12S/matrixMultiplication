@@ -6,12 +6,12 @@
 int main()
 {
     // This creates two matrices with default values
-    std::cout << "Creating matrix m1 & m2 with default value" << '\n';
+    std::cout << "Creating matrix m1 with default value" << '\n';
     Matrix<double> m1(3, 2, 3);
     m1.print();
 
     // This creates matrix using std::vector
-    std::cout << "Creating matrix m using vector" << '\n';
+    std::cout << "Creating matrix m2 using vector" << '\n';
     std::vector<std::vector<double>> v = {{1, 2, 3, 4}, {2, 3, 3, 4}};
     Matrix<double> m2(v);
     m2.print();
@@ -25,6 +25,14 @@ int main()
     std::cout << "Matrix multiplication with assignment m1 *= m2" << '\n';
     m1 *= m2;
     m1.print();
+
+    // Multiply matrix by a constant
+    std::cout << "Matrix multiplication with a double value: multByConst = m1 * " << 3.3 << '\n';
+    auto multByConst = m1 * 3.3;
+    multByConst.print();
+    std::cout << "Matrix multiplication with a integer value: multByConst *= " << 2 << '\n';
+    multByConst *= 2;
+    multByConst.print();
 
     // This assigns value of one matrix into another one
     std::cout << "Assigning m2 to m1" << '\n';
@@ -56,8 +64,12 @@ int main()
     }
 
     // Creating boolean matrix
+    std::cout << "Creating 2 boolean matrices: boolM1 & boolM2" << '\n';
     Matrix<bool> boolM1(2, 2, false);
+    boolM1.print();
+    std::cout << '\n';
     Matrix<bool> boolM2(2, 2, true);
+    boolM2.print();
     std::cout << "Multiplication of boolean matrix" << '\n';
 
     // Checking multiplication of 2 boolean matrices

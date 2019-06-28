@@ -195,6 +195,45 @@ public:
     }
 
     /**
+     *  @brief  Multiply a matrix with a constant value and return the result
+     *  @param __num  Constant value (can be char, bool or any numeric data type)
+     *  @return  Returns result of multiplication
+     *  @throw  matrix_error when multiplication is performed on char, string or boolean matrices
+     * 
+     *  Overloaded multiplication operator for multiplication of a matrix with a constant value.
+     *  Matrix & __num are first checked if operation can be performed on the data_type
+     *  It multiplies every element of matrix with __num.
+     */
+    virtual Matrix operator*(const T &__num)
+    {
+        if (std::is_same<T, char>::value)
+        {
+            throw matrix_error("Matrix multiplication can't be performed on char matrix");
+        }
+        if (std::is_same<T, std::string>::value)
+        {
+            throw matrix_error("Matrix multiplication can't be performed on string matrix");
+        }
+        if (std::is_same<T, bool>::value)
+        {
+            throw matrix_error("Matrix multiplication can't be performed on boolean matrix");
+        }
+
+        Matrix res(*this);
+
+        for (unsigned i = 0; i < m_NumRows; i++)
+        {
+            for (unsigned j = 0; j < m_NumCols; j++)
+            {
+                T val = m_Matrix[i][j] * __num;
+                res.update(i, j, val);
+            }
+        }
+
+        return res;
+    }
+
+    /**
      *  @brief  Multiplies 2 matrices and store answer in original one
      *  @param __otherMatrix  Second (right) matrix for multiplication
      *  @return  Returns original matrix after storing multiplication result in it
@@ -248,6 +287,43 @@ public:
 
         m_Matrix = temp;
         m_NumCols = __otherMatrix.getColumnSize();
+
+        return *this;
+    }
+
+    /**
+     *  @brief  Multiply a matrix by a constant value
+     *  @param __otherMatrix  Second (right) matrix for multiplication
+     *  @return  Returns original matrix after storing multiplication result in it
+     *  @throw  matrix_error when multiplication is performed on char, string or boolean matrices
+     * 
+     *  Overloaded assignment multiplication operator for multiplication of a matrix with a constant value
+     *  that store result back in original (first) matrix and returns it as the result.
+     *  Matrix & __num are first checked if operation can be performed on data_type
+     *  This operation changes the original matrix with the result of multiplication.
+     */
+    virtual Matrix operator*=(const T &__num)
+    {
+        if (std::is_same<T, char>::value)
+        {
+            throw matrix_error("Matrix multiplication can't be performed on char matrix");
+        }
+        if (std::is_same<T, std::string>::value)
+        {
+            throw matrix_error("Matrix multiplication can't be performed on string matrix");
+        }
+        if (std::is_same<T, bool>::value)
+        {
+            throw matrix_error("Matrix multiplication can't be performed on boolean matrix");
+        }
+
+        for (unsigned i = 0; i < m_NumRows; i++)
+        {
+            for (unsigned j = 0; j < m_NumCols; j++)
+            {
+                m_Matrix[i][j] = m_Matrix[i][j] * __num;
+            }
+        }
 
         return *this;
     }
