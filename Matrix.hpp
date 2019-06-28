@@ -11,6 +11,7 @@
 #include <exception>
 #include <assert.h>
 
+// Exception class to handle matrix exceptions
 class matrix_error : public std::exception
 {
 private:
@@ -30,10 +31,10 @@ class Matrix
 
 private:
     // Used to store number of rows in matrix
-    unsigned m_NumRows;
+    size_t m_NumRows;
 
     // Used to store number of columns in matrix
-    unsigned m_NumCols;
+    size_t m_NumCols;
 
     // Used to store all the values of matrix
     std::vector<std::vector<T>> m_Matrix;
@@ -50,7 +51,7 @@ public:
      *  that is to be created and are required. Matrix will be initialized with __initialVal
      *  on creation and with 0 if no value is provided.
      */
-    Matrix(unsigned __numRows, unsigned __numCols, T __initialVal = static_cast<T>(0))
+    Matrix(size_t __numRows, size_t __numCols, T __initialVal = static_cast<T>(0))
     {
         m_NumRows = __numRows;
         m_NumCols = __numCols;
@@ -80,9 +81,9 @@ public:
         }
         m_Matrix.resize(m_NumRows, std::vector<T>(m_NumCols));
 
-        for (unsigned i = 0; i < m_NumRows; i++)
+        for (size_t i = 0; i < m_NumRows; i++)
         {
-            for (unsigned j = 0; j < m_NumCols; j++)
+            for (size_t j = 0; j < m_NumCols; j++)
             {
                 m_Matrix[i][j] = __otherMatrix[i][j];
             }
@@ -105,7 +106,7 @@ public:
         {
             for (size_t j = 0; j < m_NumCols; j++)
             {
-                m_Matrix[i][j] = __otherMatrix.getVal(i, j);
+                m_Matrix[i][j] = __otherMatrix[i][j];
             }
         }
     }
@@ -134,14 +135,55 @@ public:
         m_NumCols = __otherMatrix.getColumnSize();
         m_Matrix.resize(m_NumRows, std::vector<T>(m_NumCols, static_cast<T>(0)));
 
-        for (int i = 0; i < m_NumRows; i++)
+        for (size_t i = 0; i < m_NumRows; i++)
         {
-            for (int j = 0; j < m_NumCols; j++)
+            for (size_t j = 0; j < m_NumCols; j++)
             {
-                m_Matrix[i][j] = __otherMatrix.getVal(i, j);
+                m_Matrix[i][j] = __otherMatrix[i][j];
             }
         }
         return *this;
+    }
+
+    /**
+     *  @brief  Useful for modifying element or row of matrix
+     *  @param __rowNum  Row number that is to be accessed
+     *  @return  Returns reference to std::vector<T> at that index
+     *  @throw  std::out_of_range when __rowNum >= m_NumRows
+     * 
+     *  Overloaded [] operator that allows modification of element or row of matrix
+     *  __rowNum is first checked for valid range
+     *  and return row of that index as std::vector
+     */
+    std::vector<T> &operator[](size_t __rowNum)
+    {
+        if (__rowNum >= m_NumRows)
+        {
+            std::string err_msg = "Number of rows in matrix: " + std::to_string(m_NumRows) + ". Queried row " + std::to_string(__rowNum);
+            throw std::out_of_range(err_msg);
+        }
+        return m_Matrix[__rowNum];
+    }
+
+    /**
+     *  @brief  Use to acces a row or element of matrix
+     *  @param __rowNum  Row number that is to be accessed
+     *  @return  Returns std::vector<T> at that index
+     *  @throw  std::out_of_range when __rowNum >= m_NumRows
+     * 
+     *  Overloaded [] operator for acces to matrix row or element.
+     *  __rowNum is first checked for valid range
+     *  and return row of that index as std::vector
+     *  This function doesn't allow modification of any kind
+     */
+    const std::vector<T> &operator[](size_t __rowNum) const
+    {
+        if (__rowNum >= m_NumRows)
+        {
+            std::string err_msg = "Number of rows in matrix: " + std::to_string(m_NumRows) + ". Queried row " + std::to_string(__rowNum);
+            throw std::out_of_range(err_msg);
+        }
+        return m_Matrix[__rowNum];
     }
 
     /**
@@ -179,14 +221,14 @@ public:
             throw std::out_of_range(err_msg);
         }
 
-        for (unsigned i = 0; i < m_NumRows; i++)
+        for (size_t i = 0; i < m_NumRows; i++)
         {
-            for (unsigned k = 0; k < __otherMatrix.getColumnSize(); k++)
+            for (size_t j = 0; j < __otherMatrix.getColumnSize(); j++)
             {
-                for (unsigned j = 0; j < m_NumCols; j++)
+                for (size_t k = 0; k < m_NumCols; k++)
                 {
-                    T val = m_Matrix[i][j] * __otherMatrix.getVal(j, k);
-                    res.update(i, k, res.getVal(i, k) + val);
+                    T val = (*this)[i][k] * __otherMatrix[k][j];
+                    res[i][j] = res[i][j] + val;
                 }
             }
         }
@@ -221,12 +263,12 @@ public:
 
         Matrix res(*this);
 
-        for (unsigned i = 0; i < m_NumRows; i++)
+        for (size_t i = 0; i < m_NumRows; i++)
         {
-            for (unsigned j = 0; j < m_NumCols; j++)
+            for (size_t j = 0; j < m_NumCols; j++)
             {
-                T val = m_Matrix[i][j] * __num;
-                res.update(i, j, val);
+                T val = (*this)[i][j] * __num;
+                res[i][j] = val;
             }
         }
 
@@ -273,13 +315,13 @@ public:
             throw matrix_error(err_msg);
         }
 
-        for (unsigned i = 0; i < m_NumRows; i++)
+        for (size_t i = 0; i < m_NumRows; i++)
         {
-            for (unsigned k = 0; k < __otherMatrix.getColumnSize(); k++)
+            for (size_t k = 0; k < __otherMatrix.getColumnSize(); k++)
             {
-                for (unsigned j = 0; j < m_NumCols; j++)
+                for (size_t j = 0; j < m_NumCols; j++)
                 {
-                    T val = m_Matrix[i][j] * __otherMatrix.getVal(j, k);
+                    T val = (*this)[i][j] * __otherMatrix[j][k];
                     temp[i][k] = temp[i][k] + val;
                 }
             }
@@ -317,11 +359,11 @@ public:
             throw matrix_error("Matrix multiplication can't be performed on boolean matrix");
         }
 
-        for (unsigned i = 0; i < m_NumRows; i++)
+        for (size_t i = 0; i < m_NumRows; i++)
         {
-            for (unsigned j = 0; j < m_NumCols; j++)
+            for (size_t j = 0; j < m_NumCols; j++)
             {
-                m_Matrix[i][j] = m_Matrix[i][j] * __num;
+                (*this)[i][j] = (*this)[i][j] * __num;
             }
         }
 
@@ -338,11 +380,12 @@ public:
     Matrix transpose()
     {
         Matrix res(m_NumCols, m_NumRows, static_cast<T>(0));
-        for (unsigned i = 0; i < m_NumRows; i++)
+        for (size_t i = 0; i < m_NumRows; i++)
         {
-            for (unsigned j = 0; j < m_NumCols; j++)
+            for (size_t j = 0; j < m_NumCols; j++)
             {
-                res.update(j, i, m_Matrix[i][j]);
+                // res.update(j, i, m_Matrix[i][j]);
+                res[j][i] = (*this)[i][j];
             }
         }
         return res;
@@ -354,7 +397,7 @@ public:
      * 
      *  This function returns the row size of the matrix
      */
-    unsigned getRowSize() const
+    size_t getRowSize() const
     {
         return m_NumRows;
     }
@@ -365,60 +408,17 @@ public:
      * 
      *  This function returns the column size of the matrix
      */
-    unsigned getColumnSize() const
+    size_t getColumnSize() const
     {
         return m_NumCols;
-    }
-
-    /**
-     *  @brief  Returns value from matrix at given position
-     *  @param __row  Row position in matrix
-     *  @param __col  Column position in matrix
-     *  @return  Value present in matrix at given position
-     *  @throw  std::out_of_range  If __row >= m_NumRows or __col >= m_NumCols
-     *      or __row < 0 or __col < 0
-     * 
-     *  This function takes row and columns position in matrix
-     *  and returns value present at that position in matrix
-     */
-    T getVal(unsigned __row, unsigned __col) const
-    {
-        if (__row >= m_NumRows || __col >= m_NumCols)
-        {
-            std::string err = "Matrix of size: " + std::to_string(m_NumRows) + "x" + std::to_string(m_NumCols) + ". Queried row & col index " + std::to_string(__row) + "," + std::to_string(__col);
-            throw std::out_of_range(err);
-        }
-
-        return m_Matrix[__row][__col];
-    }
-
-    /**
-     *  @brief  Updates value in matrix at given position
-     *  @param __row  Row position where value is to be updated
-     *  @param __col  Column position where value is to be updated
-     *  @param __val  New value for the given position
-     *  @throw  std::out_of_range  If __row >= m_NumRows or __col >= m_NumCols
-     *      or __row < 0 or __col < 0
-     *  
-     *  This function takes row and columns positions int the matrix
-     *  and new value with which existing value is to be replaced.
-     */
-    void update(unsigned __row, unsigned __col, T __val)
-    {
-        if (__row >= m_NumRows || __col >= m_NumCols)
-        {
-            std::string err_msg = "Matrix of size: " + std::to_string(m_NumRows) + "x" + std::to_string(m_NumCols) + ". Queried row & col index " + std::to_string(__row) + "," + std::to_string(__col);
-            throw std::out_of_range(err_msg);
-        }
-        m_Matrix[__row][__col] = __val;
     }
 
     // Prints the matrix
     void print() const
     {
-        for (unsigned i = 0; i < m_NumRows; i++)
+        for (size_t i = 0; i < m_NumRows; i++)
         {
-            for (unsigned j = 0; j < m_NumCols; j++)
+            for (size_t j = 0; j < m_NumCols; j++)
             {
                 std::cout << m_Matrix[i][j] << ' ';
             }
